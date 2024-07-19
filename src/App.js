@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Container, Typography, Grid } from '@mui/material';
+import CitySelector from './components/CitySelector';
+import PredictionCard from './components/PredictionCard';
 
-function App() {
+const App = () => {
+  const [city, setCity] = useState('London');
+  const [predictions, setPredictions] = useState([]);
+
+  useEffect(() => {
+    fetchPredictions(city);
+  }, [city]);
+
+  const fetchPredictions = async (city) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/getPredictions?city=${city}`);
+      setPredictions(response.data.predictionList);
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+    }
+  };
+
+  const handleCityChange = (event) => {
+    setCity(event.target.value);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Weather Predictions
+      </Typography>
+      <CitySelector city={city} onCityChange={handleCityChange} />
+      <Grid container spacing={3}>
+        {predictions.map((prediction, index) => (
+          <Grid item xs={12} key={index}>
+            <PredictionCard prediction={prediction} />
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
   );
-}
+};
 
 export default App;
